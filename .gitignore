@@ -1,0 +1,18 @@
+# Build and workspace artifacts
+turtlebot3_ws/
+
+# Python cache
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary runs and data
+robot_project/data/*.csv
+robot_project/results/*.csv
+robot_project/results/*.png
+
+# IDE and OS files
+.vscode/
+.idea/
+Thumbs.db
+[Dd]esktop.ini

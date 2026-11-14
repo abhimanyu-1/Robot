@@ -1,0 +1,13 @@
+simulation:
+  seed: 42
+  wheel_linear_noise_std: 0.05      # m/s encoder slip noise
+  wheel_angular_noise_std: 0.08     # rad/s turn slip noise
+  wheel_angular_bias: 0.03          # rad/s systematic wheel asymmetry bias
+  imu_yaw_noise_std: 0.015          # rad IMU orientation noise
+
+ekf:
+  # Process noise diagonal [x, y, theta]
+  q_diag: [0.002, 0.002, 0.01]
+  # Measurement noise covariance for IMU yaw [theta_imu]
+  r_imu_yaw: 0.0005
+
