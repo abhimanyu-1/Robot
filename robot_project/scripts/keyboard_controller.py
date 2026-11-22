@@ -1,209 +1,261 @@
 #!/usr/bin/env python3
 """
-WASD Keyboard Controller for TurtleBot3 Burger.
+Interactive WASD Keyboard Controller for TurtleBot3 Burger in ROS 2.
 
-Publishes geometry_msgs/msg/Twist to /cmd_vel based on keyboard input.
-
-Controls:
-    W / ↑  : Move forward
-    S / ↓  : Move backward
-    A / ←  : Rotate left (CCW)
-    D / →  : Rotate right (CW)
-    Q      : Forward + rotate left
-    E      : Forward + rotate right
-    Z      : Backward + rotate left
-    C      : Backward + rotate right
-    SPACE  : Emergency stop
-    X      : Emergency stop
-    +/-    : Increase / decrease speed by 10%
-    ESC    : Quit
-
-Usage:
-    source /opt/ros/humble/setup.bash
-    source turtlebot3_ws/install/setup.bash
-    python3 robot_project/scripts/keyboard_controller.py
+Features:
+- Sustained velocity: Commands keep the robot driving continuously until stopped.
+- 10 Hz continuous publisher: Keeps Gazebo diff_drive controller smoothly engaged.
+- Emergency STOP: Instantly halts movement with SPACE or X.
+- Full WASD + Arrow Keys + Diagonal controls.
+- Live HUD displaying current velocity and driving state.
 """
 
-import sys
 import os
+import sys
+import select
 import termios
 import tty
-import select
+import threading
 import time
 
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 
-# ── TurtleBot3 Burger Limits ──
-MAX_LINEAR  = 0.22   # m/s
-MAX_ANGULAR = 2.84   # rad/s
-LINEAR_STEP = 0.02   # m/s per key press
-ANGULAR_STEP = 0.15  # rad/s per key press
+# ── TurtleBot3 Burger Kinematic Limits ──
+MAX_LIN_VEL = 0.22   # m/s
+MAX_ANG_VEL = 2.84   # rad/s
 
-# ── Key bindings ──
-FORWARD     = {'w', 'W'}
-BACKWARD    = {'s', 'S'}
-LEFT        = {'a', 'A'}
-RIGHT       = {'d', 'D'}
-FWD_LEFT    = {'q', 'Q'}
-FWD_RIGHT   = {'e', 'E'}
-BWD_LEFT    = {'z', 'Z'}
-BWD_RIGHT   = {'c', 'C'}
-STOP        = {' ', 'x', 'X'}
-SPEED_UP    = {'+', '='}
-SPEED_DOWN  = {'-', '_'}
-QUIT        = {'\x1b'}  # ESC
-
+# Default speeds
+DEFAULT_LIN_SPEED = 0.20  # m/s
+DEFAULT_ANG_SPEED = 0.80  # rad/s
+LIN_STEP = 0.04           # m/s step per press
+ANG_STEP = 0.20           # rad/s step per press
 
 BANNER = """
-╔══════════════════════════════════════════════╗
-║   TurtleBot3 Burger – Keyboard Controller   ║
-╠══════════════════════════════════════════════╣
-║                                              ║
-║          Q (↰)    W (↑)    E (↱)             ║
-║          A (←)    STOP     D (→)             ║
-║          Z (↲)    S (↓)    C (↳)             ║
-║                                              ║
-║   SPACE / X : Emergency Stop                 ║
-║   + / -     : Speed ±10%%                     ║
-║   ESC       : Quit                           ║
-║                                              ║
-╚══════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════════════╗
+║             TurtleBot3 Burger – Keyboard Controller              ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║     [Q] Forward-Left      [W / ↑] Forward      [E] Forward-Right ║
+║     [A / ←] Turn Left     [SPACE / X] STOP     [D / →] Turn Right║
+║     [Z] Reverse-Left      [S / ↓] Reverse      [C] Reverse-Right ║
+║                                                                  ║
+║     [+] Speed +15%         [-] Speed -15%                        ║
+║     [ESC / Ctrl+C] Quit                                          ║
+║                                                                  ║
+║  * Tapping W / S / A / D keeps the robot moving steadily.       ║
+║  * Press SPACE or X to stop anytime!                             ║
+╚══════════════════════════════════════════════════════════════════╝
 """
 
 
-def get_key(timeout: float = 0.1) -> str:
-    """Read a single keypress from stdin (non-blocking with timeout)."""
-    old_settings = termios.tcgetattr(sys.stdin)
+def get_key_raw(timeout=0.08):
+    """Non-blocking keyboard read with arrow key detection."""
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
     try:
-        tty.setraw(sys.stdin.fileno())
+        tty.setraw(fd)
         rlist, _, _ = select.select([sys.stdin], [], [], timeout)
         if rlist:
-            key = sys.stdin.read(1)
-            # Handle arrow keys (escape sequences like \x1b[A)
-            if key == '\x1b':
-                extra = sys.stdin.read(2) if select.select([sys.stdin], [], [], 0.01)[0] else ''
-                if extra == '[A':
-                    return 'w'  # Up arrow → forward
-                elif extra == '[B':
-                    return 's'  # Down arrow → backward
-                elif extra == '[D':
-                    return 'a'  # Left arrow → left
-                elif extra == '[C':
-                    return 'd'  # Right arrow → right
-                else:
-                    return '\x1b'  # Plain ESC
-            return key
+            ch = sys.stdin.read(1)
+            # Arrow key escape sequence: \x1b[A, \x1b[B, \x1b[C, \x1b[D
+            if ch == '\x1b':
+                r2, _, _ = select.select([sys.stdin], [], [], 0.02)
+                if r2:
+                    ch2 = sys.stdin.read(1)
+                    if ch2 == '[':
+                        r3, _, _ = select.select([sys.stdin], [], [], 0.02)
+                        if r3:
+                            ch3 = sys.stdin.read(1)
+                            if ch3 == 'A':
+                                return 'UP'
+                            elif ch3 == 'B':
+                                return 'DOWN'
+                            elif ch3 == 'C':
+                                return 'RIGHT'
+                            elif ch3 == 'D':
+                                return 'LEFT'
+                return 'ESC'
+            return ch
         return ''
     finally:
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 
-class KeyboardController(Node):
+class KeyboardTeleopNode(Node):
     def __init__(self):
-        super().__init__('keyboard_controller')
-        self.publisher_ = self.create_publisher(Twist, 'cmd_vel', 10)
+        super().__init__('keyboard_teleop')
+        self.pub = self.create_publisher(Twist, 'cmd_vel', 10)
         self.linear_vel = 0.0
         self.angular_vel = 0.0
         self.speed_scale = 1.0
+        self.lock = threading.Lock()
+        self.state_label = "IDLE"
 
-    def clamp(self):
-        """Clamp velocities to TurtleBot3 limits."""
-        max_lin = MAX_LINEAR * self.speed_scale
-        max_ang = MAX_ANGULAR * self.speed_scale
-        self.linear_vel = max(-max_lin, min(max_lin, self.linear_vel))
-        self.angular_vel = max(-max_ang, min(max_ang, self.angular_vel))
+        # Continuous 10 Hz publisher timer ensures Gazebo diff_drive stays active
+        self.timer = self.create_timer(0.1, self.timer_callback)
 
-    def publish(self):
+    def timer_callback(self):
+        with self.lock:
+            msg = Twist()
+            msg.linear.x = float(self.linear_vel)
+            msg.angular.z = float(self.angular_vel)
+            self.pub.publish(msg)
+
+    def set_motion(self, lin, ang, label):
+        with self.lock:
+            max_lin = MAX_LIN_VEL * self.speed_scale
+            max_ang = MAX_ANG_VEL * self.speed_scale
+            self.linear_vel = max(-max_lin, min(max_lin, lin))
+            self.angular_vel = max(-max_ang, min(max_ang, ang))
+            self.state_label = label
+
+    def step_linear(self, delta):
+        with self.lock:
+            new_lin = self.linear_vel + delta
+            max_lin = MAX_LIN_VEL * self.speed_scale
+            self.linear_vel = max(-max_lin, min(max_lin, new_lin))
+            if abs(self.linear_vel) < 0.005:
+                self.linear_vel = 0.0
+            self.state_label = "FORWARD" if self.linear_vel > 0 else ("REVERSE" if self.linear_vel < 0 else "STOPPED")
+
+    def step_angular(self, delta):
+        with self.lock:
+            new_ang = self.angular_vel + delta
+            max_ang = MAX_ANG_VEL * self.speed_scale
+            self.angular_vel = max(-max_ang, min(max_ang, new_ang))
+            if abs(self.angular_vel) < 0.01:
+                self.angular_vel = 0.0
+            self.state_label = "TURN LEFT" if self.angular_vel > 0 else ("TURN RIGHT" if self.angular_vel < 0 else "DRIVING")
+
+    def emergency_stop(self):
+        with self.lock:
+            self.linear_vel = 0.0
+            self.angular_vel = 0.0
+            self.state_label = "STOPPED"
+        # Publish immediately
         msg = Twist()
-        msg.linear.x = self.linear_vel
-        msg.angular.z = self.angular_vel
-        self.publisher_.publish(msg)
+        self.pub.publish(msg)
 
-    def stop(self):
-        self.linear_vel = 0.0
-        self.angular_vel = 0.0
-        self.publish()
+    def adjust_scale(self, factor):
+        with self.lock:
+            self.speed_scale = max(0.2, min(1.5, self.speed_scale + factor))
+            # Re-clamp
+            max_lin = MAX_LIN_VEL * self.speed_scale
+            max_ang = MAX_ANG_VEL * self.speed_scale
+            self.linear_vel = max(-max_lin, min(max_lin, self.linear_vel))
+            self.angular_vel = max(-max_ang, min(max_ang, self.angular_vel))
 
-    def run(self):
-        print(BANNER)
-        print(f'  Speed scale : {self.speed_scale:.0%}')
-        print(f'  Max linear  : {MAX_LINEAR * self.speed_scale:.2f} m/s')
-        print(f'  Max angular : {MAX_ANGULAR * self.speed_scale:.2f} rad/s')
-        print()
+    def render_hud(self):
+        with self.lock:
+            lin = self.linear_vel
+            ang = self.angular_vel
+            scale = self.speed_scale
+            lbl = self.state_label
 
-        try:
-            while rclpy.ok():
-                key = get_key(0.1)
-                if not key:
-                    # Gradual deceleration when no key is pressed
-                    self.linear_vel *= 0.6
-                    self.angular_vel *= 0.6
-                    if abs(self.linear_vel) < 0.001:
-                        self.linear_vel = 0.0
-                    if abs(self.angular_vel) < 0.001:
-                        self.angular_vel = 0.0
-                elif key in QUIT:
-                    print('\n  Shutting down…')
-                    self.stop()
-                    break
-                elif key in STOP:
-                    self.linear_vel = 0.0
-                    self.angular_vel = 0.0
-                elif key in FORWARD:
-                    self.linear_vel += LINEAR_STEP
-                    self.angular_vel = 0.0
-                elif key in BACKWARD:
-                    self.linear_vel -= LINEAR_STEP
-                    self.angular_vel = 0.0
-                elif key in LEFT:
-                    self.angular_vel += ANGULAR_STEP
-                    self.linear_vel = 0.0
-                elif key in RIGHT:
-                    self.angular_vel -= ANGULAR_STEP
-                    self.linear_vel = 0.0
-                elif key in FWD_LEFT:
-                    self.linear_vel += LINEAR_STEP
-                    self.angular_vel += ANGULAR_STEP
-                elif key in FWD_RIGHT:
-                    self.linear_vel += LINEAR_STEP
-                    self.angular_vel -= ANGULAR_STEP
-                elif key in BWD_LEFT:
-                    self.linear_vel -= LINEAR_STEP
-                    self.angular_vel += ANGULAR_STEP
-                elif key in BWD_RIGHT:
-                    self.linear_vel -= LINEAR_STEP
-                    self.angular_vel -= ANGULAR_STEP
-                elif key in SPEED_UP:
-                    self.speed_scale = min(1.5, self.speed_scale + 0.1)
-                    print(f'\r  Speed scale : {self.speed_scale:.0%}    ', end='', flush=True)
-                elif key in SPEED_DOWN:
-                    self.speed_scale = max(0.1, self.speed_scale - 0.1)
-                    print(f'\r  Speed scale : {self.speed_scale:.0%}    ', end='', flush=True)
-
-                self.clamp()
-                self.publish()
-
-                # Status line
-                status = (
-                    f'\r  linear: {self.linear_vel:+.3f} m/s  |  '
-                    f'angular: {self.angular_vel:+.3f} rad/s  |  '
-                    f'scale: {self.speed_scale:.0%}    '
-                )
-                print(status, end='', flush=True)
-        except KeyboardInterrupt:
-            pass
-        finally:
-            self.stop()
+        hud = (
+            f"\r  [{lbl:<10}]  "
+            f"Linear: {lin:+5.2f} m/s  |  "
+            f"Angular: {ang:+5.2f} rad/s  |  "
+            f"Scale: {scale*100:3.0f}%    "
+        )
+        sys.stdout.write(hud)
+        sys.stdout.flush()
 
 
 def main():
     rclpy.init()
-    node = KeyboardController()
+    node = KeyboardTeleopNode()
+
+    # Spin ROS 2 in a background thread so timer callbacks fire continuously
+    spin_thread = threading.Thread(target=rclpy.spin, args=(node,), daemon=True)
+    spin_thread.start()
+
+    os.system('clear' if os.name != 'nt' else 'cls')
+    print(BANNER)
+    node.render_hud()
+
     try:
-        node.run()
+        while rclpy.ok():
+            key = get_key_raw(timeout=0.08)
+            if not key:
+                node.render_hud()
+                continue
+
+            # Exit
+            if key in ('ESC', '\x03', 'q', 'Q') and key == 'ESC':
+                break
+            if key == '\x03':  # Ctrl+C
+                break
+
+            # Emergency Stop
+            if key in (' ', 'x', 'X'):
+                node.emergency_stop()
+
+            # Forward
+            elif key in ('w', 'W', 'UP'):
+                cur_lin = node.linear_vel
+                if cur_lin < 0.05:
+                    node.set_motion(DEFAULT_LIN_SPEED * node.speed_scale, 0.0, "FORWARD")
+                else:
+                    node.step_linear(LIN_STEP)
+
+            # Reverse
+            elif key in ('s', 'S', 'DOWN'):
+                cur_lin = node.linear_vel
+                if cur_lin > -0.05:
+                    node.set_motion(-DEFAULT_LIN_SPEED * node.speed_scale, 0.0, "REVERSE")
+                else:
+                    node.step_linear(-LIN_STEP)
+
+            # Rotate Left
+            elif key in ('a', 'A', 'LEFT'):
+                cur_ang = node.angular_vel
+                if cur_ang < 0.1:
+                    node.set_motion(node.linear_vel, DEFAULT_ANG_SPEED * node.speed_scale, "TURN LEFT")
+                else:
+                    node.step_angular(ANG_STEP)
+
+            # Rotate Right
+            elif key in ('d', 'D', 'RIGHT'):
+                cur_ang = node.angular_vel
+                if cur_ang > -0.1:
+                    node.set_motion(node.linear_vel, -DEFAULT_ANG_SPEED * node.speed_scale, "TURN RIGHT")
+                else:
+                    node.step_angular(-ANG_STEP)
+
+            # Diagonal combos
+            elif key in ('q', 'Q'):
+                node.set_motion(DEFAULT_LIN_SPEED * node.speed_scale * 0.8,
+                                DEFAULT_ANG_SPEED * node.speed_scale * 0.7,
+                                "FWD-LEFT")
+            elif key in ('e', 'E'):
+                node.set_motion(DEFAULT_LIN_SPEED * node.speed_scale * 0.8,
+                                -DEFAULT_ANG_SPEED * node.speed_scale * 0.7,
+                                "FWD-RIGHT")
+            elif key in ('z', 'Z'):
+                node.set_motion(-DEFAULT_LIN_SPEED * node.speed_scale * 0.8,
+                                DEFAULT_ANG_SPEED * node.speed_scale * 0.7,
+                                "REV-LEFT")
+            elif key in ('c', 'C'):
+                node.set_motion(-DEFAULT_LIN_SPEED * node.speed_scale * 0.8,
+                                -DEFAULT_ANG_SPEED * node.speed_scale * 0.7,
+                                "REV-RIGHT")
+
+            # Speed Scaling
+            elif key in ('+', '='):
+                node.adjust_scale(+0.15)
+            elif key in ('-', '_'):
+                node.adjust_scale(-0.15)
+
+            node.render_hud()
+
+    except Exception as e:
+        print(f"\nError: {e}")
     finally:
+        node.emergency_stop()
+        print("\n\n  [STOPPED] Controller exited safely.\n")
         node.destroy_node()
         rclpy.shutdown()
 

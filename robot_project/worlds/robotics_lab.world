@@ -23,7 +23,7 @@
 
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>-2.5 -10.0 12.5 0 0.78 1.4</pose>
+        <pose>-4.2 -4.8 4.2 0 0.58 0.78</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -238,7 +238,7 @@
     </model>
 
     <!-- ============================================================ -->
-    <!--  PERIMETER WALLS (12m x 12m, 4m tall)                       -->
+    <!--  PERIMETER ARENA WALLS (10.4m x 10m, 1.2m tall open-top)     -->
     <!-- ============================================================ -->
 
     <model name="perimeter">
@@ -246,10 +246,10 @@
 
       <!-- NORTH WALL - Concrete panel with accent stripe -->
       <link name="wall_n">
-        <pose>0 5 2.0 0 0 0</pose>
-        <collision name="col"><geometry><box><size>10.4 0.25 4.0</size></box></geometry></collision>
+        <pose>0 5 0.6 0 0 0</pose>
+        <collision name="col"><geometry><box><size>10.4 0.25 1.2</size></box></geometry></collision>
         <visual name="vis_main">
-          <geometry><box><size>10.4 0.25 4.0</size></box></geometry>
+          <geometry><box><size>10.4 0.25 1.2</size></box></geometry>
           <material>
             <ambient>0.82 0.82 0.80 1</ambient>
             <diffuse>0.88 0.87 0.85 1</diffuse>
@@ -259,9 +259,9 @@
       </link>
       <!-- Accent stripe on north wall -->
       <link name="wall_n_stripe">
-        <pose>0 4.86 1.2 0 0 0</pose>
+        <pose>0 4.86 0.7 0 0 0</pose>
         <visual name="vis">
-          <geometry><box><size>10.0 0.01 0.12</size></box></geometry>
+          <geometry><box><size>10.0 0.01 0.08</size></box></geometry>
           <material>
             <ambient>0.15 0.4 0.75 1</ambient>
             <diffuse>0.2 0.5 0.85 1</diffuse>
@@ -272,10 +272,10 @@
 
       <!-- SOUTH WALL -->
       <link name="wall_s">
-        <pose>0 -5 2.0 0 0 0</pose>
-        <collision name="col"><geometry><box><size>10.4 0.25 4.0</size></box></geometry></collision>
+        <pose>0 -5 0.6 0 0 0</pose>
+        <collision name="col"><geometry><box><size>10.4 0.25 1.2</size></box></geometry></collision>
         <visual name="vis_main">
-          <geometry><box><size>10.4 0.25 4.0</size></box></geometry>
+          <geometry><box><size>10.4 0.25 1.2</size></box></geometry>
           <material>
             <ambient>0.82 0.82 0.80 1</ambient>
             <diffuse>0.88 0.87 0.85 1</diffuse>
@@ -284,9 +284,9 @@
         </visual>
       </link>
       <link name="wall_s_stripe">
-        <pose>0 -4.86 1.2 0 0 0</pose>
+        <pose>0 -4.86 0.7 0 0 0</pose>
         <visual name="vis">
-          <geometry><box><size>10.0 0.01 0.12</size></box></geometry>
+          <geometry><box><size>10.0 0.01 0.08</size></box></geometry>
           <material>
             <ambient>0.15 0.4 0.75 1</ambient>
             <diffuse>0.2 0.5 0.85 1</diffuse>
@@ -297,10 +297,10 @@
 
       <!-- EAST WALL -->
       <link name="wall_e">
-        <pose>5 0 2.0 0 0 0</pose>
-        <collision name="col"><geometry><box><size>0.25 10.0 4.0</size></box></geometry></collision>
+        <pose>5 0 0.6 0 0 0</pose>
+        <collision name="col"><geometry><box><size>0.25 10.0 1.2</size></box></geometry></collision>
         <visual name="vis_main">
-          <geometry><box><size>0.25 10.0 4.0</size></box></geometry>
+          <geometry><box><size>0.25 10.0 1.2</size></box></geometry>
           <material>
             <ambient>0.75 0.76 0.78 1</ambient>
             <diffuse>0.80 0.82 0.84 1</diffuse>
@@ -309,9 +309,9 @@
         </visual>
       </link>
       <link name="wall_e_stripe">
-        <pose>4.86 0 1.2 0 0 0</pose>
+        <pose>4.86 0 0.7 0 0 0</pose>
         <visual name="vis">
-          <geometry><box><size>0.01 9.5 0.12</size></box></geometry>
+          <geometry><box><size>0.01 9.5 0.08</size></box></geometry>
           <material>
             <ambient>0.15 0.4 0.75 1</ambient>
             <diffuse>0.2 0.5 0.85 1</diffuse>
@@ -322,26 +322,14 @@
 
       <!-- WEST WALL -->
       <link name="wall_w">
-        <pose>-5 0 2.0 0 0 0</pose>
-        <collision name="col"><geometry><box><size>0.25 10.0 4.0</size></box></geometry></collision>
+        <pose>-5 0 0.6 0 0 0</pose>
+        <collision name="col"><geometry><box><size>0.25 10.0 1.2</size></box></geometry></collision>
         <visual name="vis_main">
-          <geometry><box><size>0.25 10.0 4.0</size></box></geometry>
+          <geometry><box><size>0.25 10.0 1.2</size></box></geometry>
           <material>
             <ambient>0.75 0.76 0.78 1</ambient>
             <diffuse>0.80 0.82 0.84 1</diffuse>
             <specular>0.2 0.2 0.2 1</specular>
-          </material>
-        </visual>
-      </link>
-
-      <!-- CEILING -->
-      <link name="ceiling">
-        <pose>0 0 4.0 0 0 0</pose>
-        <visual name="vis">
-          <geometry><box><size>10.4 10.4 0.08</size></box></geometry>
-          <material>
-            <ambient>0.92 0.92 0.92 1</ambient>
-            <diffuse>0.95 0.95 0.95 1</diffuse>
           </material>
         </visual>
       </link>
@@ -411,7 +399,7 @@
       </link>
       <!-- Metal frame top rail -->
       <link name="rail_top">
-        <pose>-1.8 2.0 2.5 0 0 0</pose>
+        <pose>-1.8 2.0 1.2 0 0 0</pose>
         <visual name="vis">
           <geometry><box><size>3.8 0.12 0.08</size></box></geometry>
           <material>
@@ -423,10 +411,10 @@
       </link>
       <!-- Frosted glass panel -->
       <link name="glass">
-        <pose>-1.8 2.0 1.27 0 0 0</pose>
-        <collision name="col"><geometry><box><size>3.6 0.06 2.38</size></box></geometry></collision>
+        <pose>-1.8 2.0 0.62 0 0 0</pose>
+        <collision name="col"><geometry><box><size>3.6 0.06 1.08</size></box></geometry></collision>
         <visual name="vis">
-          <geometry><box><size>3.6 0.06 2.38</size></box></geometry>
+          <geometry><box><size>3.6 0.06 1.08</size></box></geometry>
           <material>
             <ambient>0.6 0.68 0.75 0.4</ambient>
             <diffuse>0.65 0.72 0.80 0.35</diffuse>
@@ -436,9 +424,9 @@
       </link>
       <!-- Vertical mullion posts -->
       <link name="mullion_1">
-        <pose>-3.5 2.0 1.27 0 0 0</pose>
+        <pose>-3.5 2.0 0.62 0 0 0</pose>
         <visual name="vis">
-          <geometry><box><size>0.06 0.12 2.46</size></box></geometry>
+          <geometry><box><size>0.06 0.12 1.16</size></box></geometry>
           <material>
             <ambient>0.25 0.27 0.30 1</ambient>
             <diffuse>0.35 0.37 0.40 1</diffuse>
@@ -447,9 +435,9 @@
         </visual>
       </link>
       <link name="mullion_2">
-        <pose>-0.1 2.0 1.27 0 0 0</pose>
+        <pose>-0.1 2.0 0.62 0 0 0</pose>
         <visual name="vis">
-          <geometry><box><size>0.06 0.12 2.46</size></box></geometry>
+          <geometry><box><size>0.06 0.12 1.16</size></box></geometry>
           <material>
             <ambient>0.25 0.27 0.30 1</ambient>
             <diffuse>0.35 0.37 0.40 1</diffuse>
@@ -463,10 +451,10 @@
     <model name="corridor_wall">
       <static>true</static>
       <link name="wall_body">
-        <pose>2.5 -2.2 1.5 0 0 1.5708</pose>
-        <collision name="col"><geometry><box><size>3.2 0.2 3.0</size></box></geometry></collision>
+        <pose>2.5 -2.2 0.6 0 0 1.5708</pose>
+        <collision name="col"><geometry><box><size>3.2 0.2 1.2</size></box></geometry></collision>
         <visual name="vis">
-          <geometry><box><size>3.2 0.2 3.0</size></box></geometry>
+          <geometry><box><size>3.2 0.2 1.2</size></box></geometry>
           <material>
             <ambient>0.78 0.76 0.72 1</ambient>
             <diffuse>0.85 0.83 0.80 1</diffuse>
@@ -476,7 +464,7 @@
       </link>
       <!-- Accent stripe -->
       <link name="wall_accent">
-        <pose>2.39 -2.2 1.0 0 0 1.5708</pose>
+        <pose>2.39 -2.2 0.7 0 0 1.5708</pose>
         <visual name="vis">
           <geometry><box><size>3.0 0.01 0.08</size></box></geometry>
           <material>
@@ -676,10 +664,10 @@
     <model name="structural_column">
       <static>true</static>
       <link name="link">
-        <pose>0.8 0.5 1.5 0 0 0</pose>
-        <collision name="col"><geometry><cylinder><radius>0.35</radius><length>3.0</length></cylinder></geometry></collision>
+        <pose>0.8 0.5 0.75 0 0 0</pose>
+        <collision name="col"><geometry><cylinder><radius>0.35</radius><length>1.5</length></cylinder></geometry></collision>
         <visual name="col_body">
-          <geometry><cylinder><radius>0.35</radius><length>3.0</length></cylinder></geometry>
+          <geometry><cylinder><radius>0.35</radius><length>1.5</length></cylinder></geometry>
           <material>
             <ambient>0.6 0.58 0.55 1</ambient>
             <diffuse>0.7 0.68 0.65 1</diffuse>
@@ -1031,64 +1019,6 @@
           <material>
             <ambient>0.65 0.52 0.37 1</ambient>
             <diffuse>0.72 0.6 0.44 1</diffuse>
-          </material>
-        </visual>
-      </link>
-    </model>
-
-    <!-- Ceiling light fixture models (visual only) -->
-    <model name="light_fixture_1">
-      <static>true</static>
-      <link name="link">
-        <pose>-2.5 2.5 3.95 0 0 0</pose>
-        <visual name="vis">
-          <geometry><box><size>0.9 0.2 0.05</size></box></geometry>
-          <material>
-            <ambient>0.9 0.9 0.92 1</ambient>
-            <diffuse>0.95 0.95 0.97 1</diffuse>
-            <emissive>0.4 0.38 0.35 1</emissive>
-          </material>
-        </visual>
-      </link>
-    </model>
-    <model name="light_fixture_2">
-      <static>true</static>
-      <link name="link">
-        <pose>2.5 2.5 3.95 0 0 0</pose>
-        <visual name="vis">
-          <geometry><box><size>0.9 0.2 0.05</size></box></geometry>
-          <material>
-            <ambient>0.9 0.9 0.92 1</ambient>
-            <diffuse>0.95 0.95 0.97 1</diffuse>
-            <emissive>0.4 0.38 0.35 1</emissive>
-          </material>
-        </visual>
-      </link>
-    </model>
-    <model name="light_fixture_3">
-      <static>true</static>
-      <link name="link">
-        <pose>-2.5 -2.5 3.95 0 0 0</pose>
-        <visual name="vis">
-          <geometry><box><size>0.9 0.2 0.05</size></box></geometry>
-          <material>
-            <ambient>0.9 0.9 0.92 1</ambient>
-            <diffuse>0.95 0.95 0.97 1</diffuse>
-            <emissive>0.35 0.33 0.3 1</emissive>
-          </material>
-        </visual>
-      </link>
-    </model>
-    <model name="light_fixture_4">
-      <static>true</static>
-      <link name="link">
-        <pose>2.5 -2.5 3.95 0 0 0</pose>
-        <visual name="vis">
-          <geometry><box><size>0.9 0.2 0.05</size></box></geometry>
-          <material>
-            <ambient>0.9 0.9 0.92 1</ambient>
-            <diffuse>0.95 0.95 0.97 1</diffuse>
-            <emissive>0.35 0.33 0.3 1</emissive>
           </material>
         </visual>
       </link>
