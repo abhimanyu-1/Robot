@@ -1,5 +1,8 @@
 # Build and workspace artifacts
 turtlebot3_ws/
+ubuntu_vd/
+*.vhdx
+*.tar
 
 # Python cache
 **/__pycache__/
@@ -16,3 +19,4 @@ robot_project/results/*.png
 .idea/
 Thumbs.db
 [Dd]esktop.ini
+
