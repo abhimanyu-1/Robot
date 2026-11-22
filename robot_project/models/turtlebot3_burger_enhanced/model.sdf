@@ -5,9 +5,9 @@
 
     <link name="base_footprint"/>
 
-    <!-- ════════════════════════════════════════════════════════ -->
-    <!--  BASE LINK – dark charcoal body with blue accent tint   -->
-    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!--  BASE LINK – Realistic High-Detail Research Mobile Robot         -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
     <link name="base_link">
 
       <inertial>
@@ -32,6 +32,7 @@
         </geometry>
       </collision>
 
+      <!-- Primary Chassis: Clean satin robotic white/silver plates -->
       <visual name="base_visual">
         <pose>-0.032 0 0 0 0 0</pose>
         <geometry>
@@ -41,18 +42,149 @@
           </mesh>
         </geometry>
         <material>
-          <!-- Dark charcoal with cool blue tint -->
-          <ambient>0.12 0.14 0.20 1.0</ambient>
-          <diffuse>0.15 0.18 0.28 1.0</diffuse>
-          <specular>0.35 0.38 0.45 1.0</specular>
-          <emissive>0.01 0.015 0.03 1.0</emissive>
+          <ambient>0.82 0.83 0.86 1.0</ambient>
+          <diffuse>0.88 0.89 0.92 1.0</diffuse>
+          <specular>0.4 0.42 0.45 1.0</specular>
+        </material>
+      </visual>
+
+      <!-- Polished Chrome Corner Standoffs (Front Left) -->
+      <visual name="standoff_fl">
+        <pose>0.025 0.052 0.075 0 0 0</pose>
+        <geometry><cylinder><radius>0.0035</radius><length>0.075</length></cylinder></geometry>
+        <material>
+          <ambient>0.6 0.6 0.65 1.0</ambient>
+          <diffuse>0.8 0.8 0.85 1.0</diffuse>
+          <specular>0.9 0.9 0.95 1.0</specular>
+        </material>
+      </visual>
+      <!-- Polished Chrome Corner Standoffs (Front Right) -->
+      <visual name="standoff_fr">
+        <pose>0.025 -0.052 0.075 0 0 0</pose>
+        <geometry><cylinder><radius>0.0035</radius><length>0.075</length></cylinder></geometry>
+        <material>
+          <ambient>0.6 0.6 0.65 1.0</ambient>
+          <diffuse>0.8 0.8 0.85 1.0</diffuse>
+          <specular>0.9 0.9 0.95 1.0</specular>
+        </material>
+      </visual>
+      <!-- Polished Chrome Corner Standoffs (Rear Left) -->
+      <visual name="standoff_rl">
+        <pose>-0.082 0.052 0.075 0 0 0</pose>
+        <geometry><cylinder><radius>0.0035</radius><length>0.075</length></cylinder></geometry>
+        <material>
+          <ambient>0.6 0.6 0.65 1.0</ambient>
+          <diffuse>0.8 0.8 0.85 1.0</diffuse>
+          <specular>0.9 0.9 0.95 1.0</specular>
+        </material>
+      </visual>
+      <!-- Polished Chrome Corner Standoffs (Rear Right) -->
+      <visual name="standoff_rr">
+        <pose>-0.082 -0.052 0.075 0 0 0</pose>
+        <geometry><cylinder><radius>0.0035</radius><length>0.075</length></cylinder></geometry>
+        <material>
+          <ambient>0.6 0.6 0.65 1.0</ambient>
+          <diffuse>0.8 0.8 0.85 1.0</diffuse>
+          <specular>0.9 0.9 0.95 1.0</specular>
+        </material>
+      </visual>
+
+      <!-- Front Stereo Depth Camera Housing (RealSense style) -->
+      <visual name="camera_housing">
+        <pose>0.045 0 0.102 0 0 0</pose>
+        <geometry><box><size>0.022 0.095 0.022</size></box></geometry>
+        <material>
+          <ambient>0.12 0.12 0.14 1.0</ambient>
+          <diffuse>0.18 0.18 0.20 1.0</diffuse>
+          <specular>0.7 0.7 0.75 1.0</specular>
+        </material>
+      </visual>
+      <!-- Camera Lens Left -->
+      <visual name="camera_lens_left">
+        <pose>0.057 0.028 0.102 0 1.5708 0</pose>
+        <geometry><cylinder><radius>0.007</radius><length>0.004</length></cylinder></geometry>
+        <material>
+          <ambient>0.05 0.15 0.25 1.0</ambient>
+          <diffuse>0.1 0.25 0.45 1.0</diffuse>
+          <specular>0.95 0.95 1.0 1.0</specular>
+        </material>
+      </visual>
+      <!-- Camera Lens Right -->
+      <visual name="camera_lens_right">
+        <pose>0.057 -0.028 0.102 0 1.5708 0</pose>
+        <geometry><cylinder><radius>0.007</radius><length>0.004</length></cylinder></geometry>
+        <material>
+          <ambient>0.05 0.15 0.25 1.0</ambient>
+          <diffuse>0.1 0.25 0.45 1.0</diffuse>
+          <specular>0.95 0.95 1.0 1.0</specular>
+        </material>
+      </visual>
+      <!-- Central IR Projector -->
+      <visual name="camera_ir_projector">
+        <pose>0.057 0.0 0.102 0 1.5708 0</pose>
+        <geometry><cylinder><radius>0.005</radius><length>0.004</length></cylinder></geometry>
+        <material>
+          <ambient>0.3 0.05 0.05 1.0</ambient>
+          <diffuse>0.5 0.1 0.1 1.0</diffuse>
+          <specular>0.8 0.8 0.8 1.0</specular>
+        </material>
+      </visual>
+
+      <!-- Front Dual Running Headlights (Left) -->
+      <visual name="headlight_left">
+        <pose>0.038 0.055 0.038 0 0 0</pose>
+        <geometry><box><size>0.008 0.016 0.012</size></box></geometry>
+        <material>
+          <ambient>0.9 0.92 0.95 1.0</ambient>
+          <diffuse>0.95 0.96 0.98 1.0</diffuse>
+          <emissive>0.85 0.88 0.92 1.0</emissive>
+        </material>
+      </visual>
+      <!-- Front Dual Running Headlights (Right) -->
+      <visual name="headlight_right">
+        <pose>0.038 -0.055 0.038 0 0 0</pose>
+        <geometry><box><size>0.008 0.016 0.012</size></box></geometry>
+        <material>
+          <ambient>0.9 0.92 0.95 1.0</ambient>
+          <diffuse>0.95 0.96 0.98 1.0</diffuse>
+          <emissive>0.85 0.88 0.92 1.0</emissive>
+        </material>
+      </visual>
+
+      <!-- Active System Status LED Bar (Emerald Green) -->
+      <visual name="status_led_bar">
+        <pose>-0.020 0.0 0.096 0 0 0</pose>
+        <geometry><box><size>0.008 0.045 0.004</size></box></geometry>
+        <material>
+          <ambient>0.05 0.8 0.25 1.0</ambient>
+          <diffuse>0.1 0.9 0.35 1.0</diffuse>
+          <emissive>0.2 0.85 0.4 1.0</emissive>
+        </material>
+      </visual>
+
+      <!-- Rear Antenna Mast & Status Beacon -->
+      <visual name="antenna_mast">
+        <pose>-0.085 0 0.16 0 0 0</pose>
+        <geometry><cylinder><radius>0.002</radius><length>0.10</length></cylinder></geometry>
+        <material>
+          <ambient>0.2 0.2 0.22 1.0</ambient>
+          <diffuse>0.3 0.3 0.35 1.0</diffuse>
+        </material>
+      </visual>
+      <visual name="antenna_tip">
+        <pose>-0.085 0 0.212 0 0 0</pose>
+        <geometry><sphere><radius>0.0045</radius></sphere></geometry>
+        <material>
+          <ambient>0.1 0.5 0.9 1.0</ambient>
+          <diffuse>0.2 0.6 1.0 1.0</diffuse>
+          <emissive>0.15 0.5 0.95 1.0</emissive>
         </material>
       </visual>
     </link>
 
-    <!-- ════════════════════════════════════════════════════════ -->
-    <!--  IMU LINK – sensor plugins (unchanged)                  -->
-    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!--  IMU LINK – (identical sensor physics and ROS plugin)            -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
     <link name="imu_link">
       <sensor name="tb3_imu" type="imu">
         <always_on>true</always_on>
@@ -71,16 +203,15 @@
         </imu>
         <plugin name="turtlebot3_imu" filename="libgazebo_ros_imu_sensor.so">
           <ros>
-            <!-- <namespace>/tb3</namespace> -->
             <remapping>~/out:=imu</remapping>
           </ros>
         </plugin>
       </sensor>
     </link>
 
-    <!-- ════════════════════════════════════════════════════════ -->
-    <!--  LiDAR – cyan/teal accent with emissive glow            -->
-    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!--  LiDAR SENSOR – Realistic Puck (NO BLUE SCAN LINES)              -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
     <link name="base_scan">
       <inertial>
         <pose>-0.020 0 0.161 0 0 0</pose>
@@ -105,26 +236,54 @@
         </geometry>
       </collision>
 
-      <visual name="lidar_sensor_visual">
-        <pose>-0.032 0 0.171 0 0 0</pose>
-        <geometry>
-          <mesh>
-            <uri>model://turtlebot3_common/meshes/sensors/lds.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
-          </mesh>
-        </geometry>
+      <!-- Lower turret base (dark anodized aluminum) -->
+      <visual name="lidar_turret_base">
+        <pose>-0.032 0 0.150 0 0 0</pose>
+        <geometry><cylinder><radius>0.046</radius><length>0.022</length></cylinder></geometry>
         <material>
-          <!-- Cyan/teal LiDAR accent with emissive glow -->
-          <ambient>0.0 0.45 0.55 1.0</ambient>
-          <diffuse>0.0 0.55 0.65 1.0</diffuse>
-          <specular>0.5 0.8 0.9 1.0</specular>
-          <emissive>0.0 0.12 0.15 1.0</emissive>
+          <ambient>0.15 0.15 0.17 1.0</ambient>
+          <diffuse>0.22 0.22 0.25 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
         </material>
       </visual>
 
+      <!-- 360° Optical Glass Scanning Band (realistic dark glass) -->
+      <visual name="lidar_optical_band">
+        <pose>-0.032 0 0.168 0 0 0</pose>
+        <geometry><cylinder><radius>0.048</radius><length>0.016</length></cylinder></geometry>
+        <material>
+          <ambient>0.05 0.10 0.15 1.0</ambient>
+          <diffuse>0.10 0.18 0.25 1.0</diffuse>
+          <specular>0.95 0.95 1.0 1.0</specular>
+        </material>
+      </visual>
+
+      <!-- Internal Laser Sensor Emitter Ring (subtle cyan optical accent) -->
+      <visual name="lidar_emitter_ring">
+        <pose>-0.032 0 0.168 0 0 0</pose>
+        <geometry><cylinder><radius>0.0485</radius><length>0.003</length></cylinder></geometry>
+        <material>
+          <ambient>0.0 0.6 0.8 1.0</ambient>
+          <diffuse>0.0 0.7 0.9 1.0</diffuse>
+          <emissive>0.0 0.35 0.5 1.0</emissive>
+        </material>
+      </visual>
+
+      <!-- Top Protective Cap (matte black with metallic logo ring) -->
+      <visual name="lidar_top_cap">
+        <pose>-0.032 0 0.182 0 0 0</pose>
+        <geometry><cylinder><radius>0.045</radius><length>0.012</length></cylinder></geometry>
+        <material>
+          <ambient>0.12 0.12 0.14 1.0</ambient>
+          <diffuse>0.18 0.18 0.20 1.0</diffuse>
+          <specular>0.4 0.4 0.45 1.0</specular>
+        </material>
+      </visual>
+
+      <!-- Ray Sensor: visualize=false hides all the blue scan lines! -->
       <sensor name="hls_lfcd_lds" type="ray">
         <always_on>true</always_on>
-        <visualize>true</visualize>
+        <visualize>false</visualize>
         <pose>-0.032 0 0.171 0 0 0</pose>
         <update_rate>5</update_rate>
         <ray>
@@ -149,7 +308,6 @@
         </ray>
         <plugin name="turtlebot3_laserscan" filename="libgazebo_ros_ray_sensor.so">
           <ros>
-            <!-- <namespace>/tb3</namespace> -->
             <remapping>~/out:=scan</remapping>
           </ros>
           <output_type>sensor_msgs/LaserScan</output_type>
@@ -158,9 +316,9 @@
       </sensor>
     </link>
 
-    <!-- ════════════════════════════════════════════════════════ -->
-    <!--  LEFT WHEEL – matte black rubber with orange hub        -->
-    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!--  LEFT WHEEL – Matte rubber tire + Titanium spoke rim             -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
     <link name="wheel_left_link">
       <inertial>
         <pose>0.0 0.08 0.023 -1.57 0 0</pose>
@@ -206,6 +364,7 @@
         </surface>
       </collision>
 
+      <!-- Main Tire Mesh -->
       <visual name="wheel_left_visual">
         <pose>0.0 0.08 0.023 0 0 0</pose>
         <geometry>
@@ -215,17 +374,36 @@
           </mesh>
         </geometry>
         <material>
-          <!-- Matte black rubber with subtle orange accent -->
-          <ambient>0.08 0.06 0.04 1.0</ambient>
-          <diffuse>0.10 0.08 0.06 1.0</diffuse>
+          <ambient>0.08 0.08 0.09 1.0</ambient>
+          <diffuse>0.12 0.12 0.14 1.0</diffuse>
           <specular>0.05 0.05 0.05 1.0</specular>
+        </material>
+      </visual>
+
+      <!-- Titanium Rim Hubcap (Left) -->
+      <visual name="wheel_left_hub">
+        <pose>0.0 0.089 0.023 1.5708 0 0</pose>
+        <geometry><cylinder><radius>0.020</radius><length>0.004</length></cylinder></geometry>
+        <material>
+          <ambient>0.5 0.52 0.55 1.0</ambient>
+          <diffuse>0.65 0.68 0.72 1.0</diffuse>
+          <specular>0.8 0.8 0.85 1.0</specular>
+        </material>
+      </visual>
+      <!-- Orange Hub Accent Ring -->
+      <visual name="wheel_left_accent">
+        <pose>0.0 0.0915 0.023 1.5708 0 0</pose>
+        <geometry><cylinder><radius>0.008</radius><length>0.002</length></cylinder></geometry>
+        <material>
+          <ambient>0.85 0.40 0.05 1.0</ambient>
+          <diffuse>0.95 0.50 0.10 1.0</diffuse>
         </material>
       </visual>
     </link>
 
-    <!-- ════════════════════════════════════════════════════════ -->
-    <!--  RIGHT WHEEL – matte black rubber with orange hub       -->
-    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!--  RIGHT WHEEL – Matte rubber tire + Titanium spoke rim            -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
     <link name="wheel_right_link">
       <inertial>
         <pose>0.0 -0.08 0.023 -1.57 0 0</pose>
@@ -271,6 +449,7 @@
         </surface>
       </collision>
 
+      <!-- Main Tire Mesh -->
       <visual name="wheel_right_visual">
         <pose>0.0 -0.08 0.023 0 0 0</pose>
         <geometry>
@@ -280,17 +459,36 @@
           </mesh>
         </geometry>
         <material>
-          <!-- Matte black rubber with subtle orange accent -->
-          <ambient>0.08 0.06 0.04 1.0</ambient>
-          <diffuse>0.10 0.08 0.06 1.0</diffuse>
+          <ambient>0.08 0.08 0.09 1.0</ambient>
+          <diffuse>0.12 0.12 0.14 1.0</diffuse>
           <specular>0.05 0.05 0.05 1.0</specular>
+        </material>
+      </visual>
+
+      <!-- Titanium Rim Hubcap (Right) -->
+      <visual name="wheel_right_hub">
+        <pose>0.0 -0.089 0.023 1.5708 0 0</pose>
+        <geometry><cylinder><radius>0.020</radius><length>0.004</length></cylinder></geometry>
+        <material>
+          <ambient>0.5 0.52 0.55 1.0</ambient>
+          <diffuse>0.65 0.68 0.72 1.0</diffuse>
+          <specular>0.8 0.8 0.85 1.0</specular>
+        </material>
+      </visual>
+      <!-- Orange Hub Accent Ring -->
+      <visual name="wheel_right_accent">
+        <pose>0.0 -0.0915 0.023 1.5708 0 0</pose>
+        <geometry><cylinder><radius>0.008</radius><length>0.002</length></cylinder></geometry>
+        <material>
+          <ambient>0.85 0.40 0.05 1.0</ambient>
+          <diffuse>0.95 0.50 0.10 1.0</diffuse>
         </material>
       </visual>
     </link>
 
-    <!-- ════════════════════════════════════════════════════════ -->
-    <!--  CASTER WHEEL (unchanged physics)                       -->
-    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!--  CASTER WHEEL (identical physics)                                -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
     <link name='caster_back_link'>
       <pose>-0.081 0 -0.004 -1.57 0 0</pose>
       <inertial>
@@ -325,9 +523,9 @@
       </collision>
     </link>
 
-    <!-- ════════════════════════════════════════════════════════ -->
-    <!--  JOINTS (identical to original)                         -->
-    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!--  JOINTS (identical to original TurtleBot3)                       -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
     <joint name="base_joint" type="fixed">
       <parent>base_footprint</parent>
       <child>base_link</child>
@@ -375,12 +573,11 @@
       </axis>
     </joint>
 
-    <!-- ════════════════════════════════════════════════════════ -->
-    <!--  PLUGINS (identical to original)                        -->
-    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!--  PLUGINS (identical topics: cmd_vel, odom, tf, joint_states)     -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
     <plugin name="turtlebot3_diff_drive" filename="libgazebo_ros_diff_drive.so">
       <ros>
-        <!-- <namespace>/tb3</namespace> -->
       </ros>
       <update_rate>30</update_rate>
       <left_joint>wheel_left_joint</left_joint>
@@ -400,7 +597,6 @@
 
     <plugin name="turtlebot3_joint_state" filename="libgazebo_ros_joint_state_publisher.so">
       <ros>
-        <!-- <namespace>/tb3</namespace> -->
         <remapping>~/out:=joint_states</remapping>
       </ros>
       <update_rate>30</update_rate>
