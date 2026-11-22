@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-Launch file for the Robotics Lab simulation with enhanced TurtleBot3 Burger.
+Launch file for the Robotics Laboratory simulation.
 
-Starts:
-  1. Gazebo server with robotics_lab.world
-  2. Gazebo GUI client
-  3. Robot state publisher (URDF → TF)
-  4. Spawn the enhanced TurtleBot3 Burger model
+Features:
+- Spawns the enhanced realistic robot model onto the green start pad.
+- High timeout (180s) and graceful delay to ensure Gazebo is fully ready.
+- Automatically sets GAZEBO_MODEL_PATH so all meshes load seamlessly.
+- Configurable initial pose and sim time.
 """
+
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
@@ -15,6 +16,7 @@ from launch.actions import (
     IncludeLaunchDescription,
     DeclareLaunchArgument,
     SetEnvironmentVariable,
+    TimerAction,
 )
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
@@ -31,25 +33,27 @@ def generate_launch_description():
     world_path = os.path.join(project_root, 'worlds', 'robotics_lab.world')
     models_path = os.path.join(project_root, 'models')
 
-    # Read the enhanced model SDF for inline spawning
+    # Enhanced realistic robot model SDF
     enhanced_sdf = os.path.join(
         models_path, 'turtlebot3_burger_enhanced', 'model.sdf'
     )
 
-    # ── Launch args ──
+    # ── Launch configurations ──
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     x_pose = LaunchConfiguration('x_pose', default='-1.0')
     y_pose = LaunchConfiguration('y_pose', default='-1.0')
 
-    # Extend GAZEBO_MODEL_PATH so our custom models directory is found
+    # Ensure GAZEBO_MODEL_PATH includes our custom models and turtlebot3 models
+    tb3_models = os.path.join(pkg_turtlebot3_gazebo, 'models')
     existing_model_path = os.environ.get('GAZEBO_MODEL_PATH', '')
-    new_model_path = models_path + (':' + existing_model_path if existing_model_path else '')
+    new_model_path = f"{models_path}:{tb3_models}:{existing_model_path}".strip(':')
+
     set_model_path = SetEnvironmentVariable(
         name='GAZEBO_MODEL_PATH',
         value=new_model_path,
     )
 
-    # 1. Gazebo Server
+    # 1. Gazebo Server with the robotics_lab world
     gzserver_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_gazebo_ros, 'launch', 'gzserver.launch.py')
@@ -64,7 +68,7 @@ def generate_launch_description():
         ),
     )
 
-    # 3. Robot state publisher (publishes URDF → /robot_description → TF)
+    # 3. Robot State Publisher (publishes URDF -> TF)
     robot_state_publisher_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_turtlebot3_gazebo, 'launch', 'robot_state_publisher.launch.py')
@@ -72,8 +76,8 @@ def generate_launch_description():
         launch_arguments={'use_sim_time': use_sim_time}.items(),
     )
 
-    # 4. Spawn the enhanced TurtleBot3 Burger from our custom SDF
-    spawn_robot_cmd = Node(
+    # 4. Spawner: Spawns the enhanced realistic robot with 180s timeout so it NEVER dies
+    spawn_robot_node = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
         arguments=[
@@ -82,8 +86,15 @@ def generate_launch_description():
             '-x', x_pose,
             '-y', y_pose,
             '-z', '0.01',
+            '-timeout', '180.0',
         ],
         output='screen',
+    )
+
+    # Delay spawn by 2 seconds to let gzserver initialize its ROS services
+    delayed_spawn_cmd = TimerAction(
+        period=2.0,
+        actions=[spawn_robot_node],
     )
 
     ld = LaunchDescription()
@@ -91,6 +102,6 @@ def generate_launch_description():
     ld.add_action(gzserver_cmd)
     ld.add_action(gzclient_cmd)
     ld.add_action(robot_state_publisher_cmd)
-    ld.add_action(spawn_robot_cmd)
+    ld.add_action(delayed_spawn_cmd)
 
     return ld
